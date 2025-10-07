@@ -1,3 +1,4 @@
+.idea/*
 src/data/*.xlsx
 src/data/*.csv
 *.DS_Store
