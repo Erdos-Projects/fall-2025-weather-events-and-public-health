@@ -164,7 +164,7 @@ def temperature_plots():
 
 
 sns.set_style("whitegrid")
-county_df = pd.read_excel("data/County_Statistics_with_Temp.xlsx")
+county_df = pd.read_excel("County_Statistics_with_Temp.xlsx")
 # dropping hospitalization
 county_df = county_df.drop('Hospitalizations / 100000', axis=1)
 # drop na to drop rows with empty values for emergency visits

@@ -42,7 +42,7 @@ def regressor(feature):
     plt.plot(X, y_pred, color='black', linewidth=2, label='Regression Line')
 
     plt.xlabel(feature)
-    plt.ylabel("Emergency Visits per 100000")
+    plt.ylabel("Emergency Visits per 100000 (Adjusted)")
     plt.title(f"Linear Regression: {feature} vs Emergency Visits")
     plt.legend()
     plt.grid(True)
