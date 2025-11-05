@@ -8,6 +8,8 @@ from sklearn.model_selection import train_test_split
 
 
 df = pd.read_excel('County_Statistics_with_Temp.xlsx')
+df_Emergency = df.dropna(subset=['Emergency Visits / 100000'])
+df_Emergency = df_Emergency.drop('Hospitalizations / 100000', axis=1)
 
 
 def histogram(feature, color):
@@ -16,19 +18,6 @@ def histogram(feature, color):
     plt.xlabel(feature)
     plt.ylabel('Number of Counties')
     plt.show()
-
-
-def temperature_plot(month):
-    sns.scatterplot(
-        data=df,
-        x=f'{month} max temp (F)',
-        y='Emergency Visits / 100000'
-    )
-
-    plt.title(f'Emergency Visits vs {month} Max Temperature')
-    plt.show()
-
-    print(df[['Emergency Visits / 100000', f'{month} max temp (F)']].corr())
 
 
 # Notes: A few counties have high ER visit and that corresponds to high heat counties like Imperial County
@@ -137,50 +126,34 @@ def fit_linear_with_intercept_enforced(x, y, lower, upper,title, x_thresh=80.0, 
     }
 
 
-df.sample(4)
-df_Emergency = df.dropna(subset=['Emergency Visits / 100000'])
-df_Emergency = df_Emergency.drop('Hospitalizations / 100000', axis=1)
+def temperature_plots():
+    x_july = df_Emergency['July max temp (F)']
+    x_august = df_Emergency['August max temp (F)']
+    # as numpy arrays
+    x_july_np = x_july.to_numpy(dtype=float)
+    x_august_np = x_august.to_numpy(dtype=float)
+    # elementwise max: np.fmax returns the non-NaN value when one side is NaN
+    x_max_np = np.fmax(x_july_np, x_august_np)
 
-# original series from your dataframe
-x_july = df_Emergency['July max temp (F)']
-x_august = df_Emergency['August max temp (F)']
-# as numpy arrays
-x_july_np = x_july.to_numpy(dtype=float)
-x_august_np = x_august.to_numpy(dtype=float)
-# elementwise max: np.fmax returns the non-NaN value when one side is NaN
-x_max_np = np.fmax(x_july_np, x_august_np)
-y = df_Emergency['Emergency Visits / 100000']
-y_np = y.to_numpy()
-y_list = y.tolist()
+    y = df_Emergency['Emergency Visits / 100000']
+    y_np = y.to_numpy()
+    y_list = y.tolist()
 
-# x_all and y_all come from your preprocessed arrays / lists
-lower = [0]   # lower bound for m
-upper = [ 1e6]   # upper bound for m
+    lower = [0]
+    upper = [1e6]
 
-out = fit_linear_with_intercept_enforced(x_july_np, y_list, lower, upper, title = 'July',
-                                         x_thresh=80.0, y_min=np.nanmin(y_list), plot=True)
+    out = fit_linear_with_intercept_enforced(x_july_np, y_list, lower, upper, title = 'July',
+                                             x_thresh=80.0, y_min=np.nanmin(y_list), plot=True)
+    print("m =", out['m'], "b =", out['b'], "RMSE =", out['rmse'], "R2 =", out['r2'])
 
-print("m =", out['m'], "b =", out['b'], "RMSE =", out['rmse'], "R2 =", out['r2'])
-
-
-# x_all and y_all come from your preprocessed arrays / lists
-lower = [0]   # lower bound for m
-upper = [ 1e6]   # upper bound for m
-
-out = fit_linear_with_intercept_enforced(x_august_np, y_list, lower, upper, title = 'August',
-                                         x_thresh=80.0, y_min=np.nanmin(y_list), plot=True)
-
-print("m =", out['m'], "b =", out['b'], "RMSE =", out['rmse'], "R2 =", out['r2'])
+    out = fit_linear_with_intercept_enforced(x_august_np, y_list, lower, upper, title = 'August',
+                                             x_thresh=80.0, y_min=np.nanmin(y_list), plot=True)
+    print("m =", out['m'], "b =", out['b'], "RMSE =", out['rmse'], "R2 =", out['r2'])
 
 
-# x_all and y_all come from your preprocessed arrays / lists
-lower = [0]   # lower bound for m
-upper = [ 1e6]   # upper bound for m
-
-out = fit_linear_with_intercept_enforced(x_max_np, y_list, lower, upper, title = 'max temp',
-                                         x_thresh=80.0, y_min=np.nanmin(y_list), plot=True)
-
-print("m =", out['m'], "b =", out['b'], "RMSE =", out['rmse'], "R2 =", out['r2'])
+    out = fit_linear_with_intercept_enforced(x_max_np, y_list, lower, upper, title = 'max temp',
+                                             x_thresh=80.0, y_min=np.nanmin(y_list), plot=True)
+    print("m =", out['m'], "b =", out['b'], "RMSE =", out['rmse'], "R2 =", out['r2'])
 
 
 # Ok, now I have an acceptable relationship between temperature and emergency visit.
@@ -221,9 +194,6 @@ county_df['% w/o Internet'] = county_df['% w/o Internet'].astype(float)
 county_df['Utility Services Threat'] = county_df['Utility Services Threat'].astype(float)
 
 
-county_df.info()
-county_df.sample()
-
 # copy to avoid modifying original unless intended
 county_df_residual = county_df.copy()
 
@@ -253,72 +223,47 @@ county_df_residual[resid_col] = y_resid
 county_df_residual = county_df_residual[county_df_residual['max_july_august_temp'] >= 80]
 
 
+def pairplot_residual(features, imperial=False):
+    if imperial:
+        residual = county_df_residual
 
-county_train, county_test = train_test_split(
-    county_df_residual, test_size=0.2, random_state=216, shuffle=True
-)
-features =county_train.columns[2:11]
-print(features)
-sns.pairplot(county_train,
-    y_vars=["Emergency Visits / 100000 temp residual"],
-    x_vars=features,
-    height=5,
-    diag_kind=None,
-)
+    else:
+        residual = county_df_residual[county_df_residual['County'] != "Imperial"]
 
-plt.show()
+    county_train, county_test = train_test_split(
+        county_df_residual, test_size=0.2, random_state=216, shuffle=True
+    )
 
-county_df_residual[features].corrwith(county_df_residual['Emergency Visits / 100000 temp residual'])
+    sns.pairplot(county_train,
+        y_vars=["Emergency Visits / 100000 temp residual"],
+        x_vars=features,
+        height=5,
+        diag_kind=None,
+    )
 
-county_df_noImperial = county_df_residual[county_df_residual['County'] != "Imperial"]
+    plt.show()
 
-county_train, county_test = train_test_split(
-    county_df_noImperial, test_size=0.2, random_state=216, shuffle=True
-)
-features =county_train.columns[2:11]
-print(features)
+    print("Correlations with Emergency Visits / 100000 residuals")
+    print(county_df_residual[features].corrwith(county_df_residual['Emergency Visits / 100000 temp residual']))
+    print()
 
-sns.pairplot(county_train,
-    y_vars=["Emergency Visits / 100000 temp residual"],
-    x_vars=features,
-    height=5,
-    diag_kind=None,
-)
+    sns.pairplot(data=county_train,
+                 x_vars=features,
+                 y_vars=features,
+                 hue=county_train.columns[0],
+                 plot_kws={'alpha': .6})
 
-sns.pairplot(data = county_train,
-                x_vars = features,
-                y_vars = features,
-                hue = county_train.columns[0],
-                plot_kws = {'alpha':.6})
-
-plt.show()
-
-features2 = ['Energy Burden % of Income', 'Imperviousness','% w/o Internet']
-print(features2)
-
-county_df_noImperial = county_df_residual[county_df_residual['County'] != "Imperial"]
-county_train, county_test = train_test_split(
-    county_df_noImperial, test_size=0.2, random_state=216, shuffle=True
-)
-sns.pairplot(county_train,
-    y_vars=["Emergency Visits / 100000 temp residual"],
-    x_vars=features2,
-    height=5,
-    diag_kind=None,
-)
-
-sns.pairplot(data = county_train,
-                x_vars = features2,
-                y_vars = features2,
-                plot_kws = {'alpha':.6})
-
-county_df_noImperial[features].corrwith(county_df_noImperial['Emergency Visits / 100000 temp residual'])
+    return county_train, county_test
 
 
-#We are going to use 4 features
+pairplot_residual(county_df_residual.columns[2:11], imperial=True)
 
-clean_county_train = county_train[['County', 'Energy Burden % of Income', 'Park within 1/2 Mile','Imperviousness','% w/o Internet', 'Emergency Visits / 100000 temp residual']]
-clean_county_validate = county_test[['County', 'Energy Burden % of Income', 'Park within 1/2 Mile','Imperviousness','% w/o Internet', 'Emergency Visits / 100000 temp residual']]
+# We are going to use 4 features
+features = ['Energy Burden % of Income', 'Park within 1/2 Mile', 'Imperviousness', '% w/o Internet']
+county_train, county_test = pairplot_residual(features)
+
+clean_county_train = county_train[['County', *features, 'Emergency Visits / 100000 temp residual']]
+clean_county_validate = county_test[['County', *features, 'Emergency Visits / 100000 temp residual']]
 
 clean_county_train.to_csv('src/train_post_EDA.csv', index=False)
 clean_county_validate.to_csv('src/validate_post_EDA.csv', index=False)

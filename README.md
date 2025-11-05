@@ -9,7 +9,7 @@ Deciding what resources and infrastructure that should be prioritized in each co
 Who are the stakeholders and what do they care about?
 The stakeholders would be the general public, local decision-makers (e.g., city councils), and government officials (e.g., state representatives). They should care about building resilient communities to protect the well-being of everyone or at least the economic productivity of workers (outdoor, healthcare, retail) in excessive heat.
 
-Unit of analysis: [percent or fraction per capita] of built environment indicators and corresponding rate of heat-related illnesses, hospitalizations, and deaths.
+Unit of analysis: percent or fraction per capita of built environment indicators and corresponding rate of heat-related illnesses, hospitalizations, and deaths.
 
 Scope and boundaries: Geographically restricted to California regions that are separated by either zip code, neighborhood, or county. Time horizon is not restricted as of now. There is no population restriction. We're not including demographic or health features.
 

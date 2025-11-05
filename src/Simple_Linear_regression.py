@@ -7,7 +7,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
 
-df = pd.read_csv("train_post_EDA.csv")
+df = pd.read_csv("src/train_post_EDA.csv")
 
 def regressor(feature):
     print("Using Feature:", feature)
@@ -49,6 +49,7 @@ def regressor(feature):
     plt.show()
 
     print("Regression Equation: y = {:.3f}x + {:.3f}".format(model.coef_[0], model.intercept_))
+    print()
 
 
 regressor("Energy Burden % of Income")
