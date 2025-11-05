@@ -1,7 +1,7 @@
 # fall-2025-weather-events-and-public-health
-Team project: fall-2025-weather-events-and-public-health
+**Team project:** `fall-2025-weather-events-and-public-health`
 
-Research question: Which built environment indicators (e.g., percent of residential areas with AC, parks and greenspaces, tree cover) have the most influence on heat-related ilnesses and deaths during heatwaves for different regions in California?
+Research question: Which built environment indicators (e.g., percent of residential areas with AC, parks and greenspaces, tree cover) have the most influence on heat-related illnesses and deaths during heatwaves for different regions in California?
 
 What decision or action will this analysis inform? 
 Deciding what resources and infrastructure that should be prioritized in each community to minimize heat-related illnesses and deaths during a heatwave.
