@@ -1,4 +1,5 @@
 .idea/*
-src/data/*.xlsx
-src/data/*.csv
+data/Master_CVI_Dataset.xlsx
+
 *.DS_Store
+*.pyc
