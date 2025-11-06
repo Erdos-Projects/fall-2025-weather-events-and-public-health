@@ -156,6 +156,7 @@ def temperature_plots():
     print("m =", out['m'], "b =", out['b'], "RMSE =", out['rmse'], "R2 =", out['r2'])
 
 
+temperature_plots()
 # Ok, now I have an acceptable relationship between temperature and emergency visit.
 # August has a lower
 # Now I need to normalize this
